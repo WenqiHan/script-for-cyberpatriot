@@ -1,0 +1,97 @@
+#!/bin/bash
+
+# Function to check the status of the firewall
+check_firewall() {
+    echo "Checking firewall status..."
+    sudo ufw status
+}
+
+# Function to check for system updates
+check_updates() {
+    echo "Checking for system updates..."
+    sudo apt update
+}
+
+# Function to check for system upgrades
+check_upgrades() {
+    echo "Checking for system upgrades..."
+    sudo apt list --upgradable
+}
+
+# Function to manage users (add/delete, change password, and add to groups)
+manage_users() {
+    echo "Listing current users:"
+    cut -d: -f1 /etc/passwd
+
+    echo "Would you like to add a new user? (y/n)"
+    read add_user
+    if [ "$add_user" == "y" ]; then
+        echo "Enter the new username:"
+        read username
+        sudo adduser $username
+    fi
+
+    echo "Would you like to delete a user? (y/n)"
+    read del_user
+    if [ "$del_user" == "y" ]; then
+        echo "Enter the username to delete:"
+        read username
+        sudo deluser $username
+    fi
+
+    echo "Would you like to change a user's password? (y/n)"
+    read change_pass
+    if [ "$change_pass" == "y" ]; then
+        echo "Enter the username to change password:"
+        read username
+        sudo passwd $username
+    fi
+
+    echo "Would you like to add a user to a group? (y/n)"
+    read add_group
+    if [ "$add_group" == "y" ]; then
+        echo "Enter the username:"
+        read username
+        echo "Enter the group name:"
+        read group
+        sudo usermod -aG $group $username
+    fi
+}
+
+# Function to check installed packages and offer to remove them
+manage_packages() {
+    echo "Listing installed packages..."
+    dpkg --get-selections | grep -v deinstall
+
+    echo "Would you like to remove any packages? (y/n)"
+    read remove_pkg
+    if [ "$remove_pkg" == "y" ]; then
+        echo "Enter the package name to remove:"
+        read pkg
+        sudo apt remove --purge $pkg
+    fi
+}
+
+# Main menu
+while true; do
+    echo "Security Check Script"
+    echo "1. Check Firewall"
+    echo "2. Check for System Updates"
+    echo "3. Check for System Upgrades"
+    echo "4. Manage Users"
+    echo "5. Manage Packages"
+    echo "6. Exit"
+    echo "Choose an option:"
+    read option
+
+    case $option in
+        1) check_firewall ;;
+        2) check_updates ;;
+        3) check_upgrades ;;
+        4) manage_users ;;
+        5) manage_packages ;;
+        6) echo "Exiting..."; exit 0 ;;
+        *) echo "Invalid option. Please choose again." ;;
+    esac
+
+done
